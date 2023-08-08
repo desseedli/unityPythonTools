@@ -38,7 +38,7 @@ class changeLuaCenter:
     def write(self, path, filename):
         if not os.path.exists(path):
             os.makedirs(path)
-        with open("tmp", "w", newline='') as csvfile:
+        with open("tmp", "w", newline='',encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerows(self.mData)
         csvfile.close()
@@ -76,7 +76,7 @@ class changeCSVCenter:
         if not os.path.exists(path):
             os.makedirs(path)
 
-        with open("tmp", "w", newline='') as csvfile:
+        with open("tmp", "w", newline='',encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerows(self.mData)
         csvfile.close()
@@ -113,7 +113,7 @@ class changeServerCenter:
     def write(self, path, filename):
         if not os.path.exists(path):
             os.makedirs(path)
-        with open("tmp", "w", newline='') as csvfile:
+        with open("tmp", "w", newline='',encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerows(self.mData)
         csvfile.close()
