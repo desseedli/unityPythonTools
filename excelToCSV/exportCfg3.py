@@ -4,6 +4,8 @@ import logging
 import csv
 import openpyxl
 
+from luaCodeGen import LuaCodeGen
+
 INPUTPATH = u"excel"
 SERVERPATH = u"csv_server"
 CLIENTPATH = u"csv_client"
@@ -20,7 +22,7 @@ class changeLuaCenter:
 
     def getvalue(self, filename):
         self.mData = []
-        workbook = openpyxl.load_workbook(filename)
+        workbook = openpyxl.load_workbook(filename, data_only=True)
         table = workbook.worksheets[0]
         max_row = table.max_row
         max_column = table.max_column
@@ -38,7 +40,7 @@ class changeLuaCenter:
     def write(self, path, filename):
         if not os.path.exists(path):
             os.makedirs(path)
-        with open("tmp", "w", newline='',encoding='utf-8') as csvfile:
+        with open("tmp", "w", newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerows(self.mData)
         csvfile.close()
@@ -64,7 +66,7 @@ class changeCSVCenter:
             row = []
             for j in range(1, max_column + 1):
                 value = table.cell(i, j).value
-                splitType = table.cell(SplitCol,j).value
+                splitType = table.cell(SplitCol, j).value
                 if splitType is not None:
                     if 'a' in splitType or 'c' in splitType:
                         row.append(value)
@@ -76,7 +78,7 @@ class changeCSVCenter:
         if not os.path.exists(path):
             os.makedirs(path)
 
-        with open("tmp", "w", newline='',encoding='utf-8') as csvfile:
+        with open("tmp", "w", newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerows(self.mData)
         csvfile.close()
@@ -113,7 +115,7 @@ class changeServerCenter:
     def write(self, path, filename):
         if not os.path.exists(path):
             os.makedirs(path)
-        with open("tmp", "w", newline='',encoding='utf-8') as csvfile:
+        with open("tmp", "w", newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerows(self.mData)
         csvfile.close()
