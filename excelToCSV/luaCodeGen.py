@@ -4,16 +4,19 @@ import csv
 file_path = './csv_lua'
 save_path = './lua'
 
+
 # 不能使用CSV的公式 比如F5格子+1等
 class LuaCodeGen:
-
-    @staticmethod
-    def Tab(self, count):
-        return "    " * count
-
     def IsInt(string):
         try:
             int(string)
+            return True
+        except ValueError:
+            return False
+
+    def IsFloat(string):
+        try:
+            float(string)
             return True
         except ValueError:
             return False
@@ -29,18 +32,31 @@ class LuaCodeGen:
                     if not index == len(parts) - 1:
                         res += ','
                 else:
-                    res += '\'' + part + '\''
+                    if LuaCodeGen.IsInt(part) or LuaCodeGen.IsFloat(part):
+                        res += part
+                    else:
+                        res += '\'' + part + '\''
                     if not index == len(parts) - 1:
                         res += ','
         elif ':' in string:
             parts = string.split(':')
             res += "{"
             for index, part in enumerate(parts):
-                if LuaCodeGen.IsInt(part):
+                if LuaCodeGen.IsInt(part) or LuaCodeGen.IsFloat(part):
                     res += part
                     if not index == len(parts) - 1:
                         res += ','
             res += "}"
+        elif '|' in string and ';' not in string and ':' not in string:
+            res += "{{"
+            if LuaCodeGen.IsInt(string) or LuaCodeGen.IsFloat(string):
+                res += string
+            res += "}}"
+        else:
+            if LuaCodeGen.IsInt(string) or LuaCodeGen.IsFloat(string):
+                res += string
+            else:
+                res += '\'' + string + '\''
         return res
 
     # 代码生成函数
@@ -51,7 +67,7 @@ class LuaCodeGen:
             if file_name.endswith('csv'):
                 file_name_no_extension, extension = os.path.splitext(file_name)
                 open_file_path = os.path.join(file_path, file_name)
-                lua_content = "local " + file_name_no_extension + " {\n"
+                lua_content = "local " + file_name_no_extension + " ={\n"
                 with open(open_file_path, 'r', encoding='utf-8') as csvfile:
                     csvreader = csv.reader(csvfile)
                     next(csvfile)
@@ -60,7 +76,7 @@ class LuaCodeGen:
 
                     csvdictreader = csv.DictReader(csvfile, fieldnames=header)
                     for row_index, row_value in enumerate(csvdictreader, start=4):
-                        lua_content += "[" + str(row_index - 3) + "] = {\n"
+                        lua_content += "[" + row_value['Id'] + "] = {\n"
                         for index, value in enumerate(header):
                             type = types[index]
                             if type == "int":
@@ -81,5 +97,5 @@ class LuaCodeGen:
                 with open(lua_file_name, 'w', encoding='utf-8') as lua_file:
                     lua_file.write(lua_content)
 
-
-LuaCodeGen.GenLuaCode()
+        print("done")
+#LuaCodeGen.GenLuaCode()

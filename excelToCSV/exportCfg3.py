@@ -1,12 +1,12 @@
 import os
-import time
 import logging
 import csv
 import openpyxl
 
+import luaCodeGen
 from luaCodeGen import LuaCodeGen
 
-INPUTPATH = u"excel"
+INPUTPATH = u"excel_new"
 SERVERPATH = u"csv_server"
 CLIENTPATH = u"csv_client"
 LUACSVOUTPATH = u"csv_lua"
@@ -14,7 +14,7 @@ ExportLuaFileCfgPath = u"exportLuaFileCfg.txt"
 ExportCSVFileCfgPath = u"exportCSVFileCfg.txt"
 SplitCol = 3
 Col = 4
-
+IsUseExportList = False
 
 class changeLuaCenter:
     def __init__(self):
@@ -137,23 +137,24 @@ def handleExcel():
     handleClear()
     csvCfgFiles = []
     luaCfgFiles = []
-    csvCfgFile = open(ExportCSVFileCfgPath, 'r')
-    line = csvCfgFile.readline()
-    while line:
-        csvCfgFiles.append(line.rstrip())
+    if IsUseExportList:
+        csvCfgFile = open(ExportCSVFileCfgPath, 'r')
         line = csvCfgFile.readline()
-    csvCfgFile.close()
+        while line:
+            csvCfgFiles.append(line.rstrip())
+            line = csvCfgFile.readline()
+        csvCfgFile.close()
 
-    luaCfgFile = open(ExportLuaFileCfgPath, 'r')
-    line = luaCfgFile.readline()
-    while line:
-        luaCfgFiles.append(line.rstrip())
+        luaCfgFile = open(ExportLuaFileCfgPath, 'r')
         line = luaCfgFile.readline()
-    luaCfgFile.close()
+        while line:
+            luaCfgFiles.append(line.rstrip())
+            line = luaCfgFile.readline()
+        luaCfgFile.close()
 
     files, dirs, root = readFilename(INPUTPATH)
     for fi in files:
-        if fi in csvCfgFiles or len(csvCfgFiles) == 0:
+        if fi in csvCfgFiles or len(csvCfgFiles) == 0 or not IsUseExportList:
             print("export excel " + fi + " to " + CLIENTPATH)
             str_stock = os.path.join(INPUTPATH, fi)
             if os.path.exists(str_stock):
@@ -164,7 +165,7 @@ def handleExcel():
             else:
                 print(str_stock + " don't exist")
 
-        if fi in luaCfgFiles or len(luaCfgFiles) == 0:
+        if fi in luaCfgFiles or len(luaCfgFiles) == 0 or not IsUseExportList:
             print("export excel " + fi + " to " + LUACSVOUTPATH)
             str_stock = os.path.join(INPUTPATH, fi)
             if os.path.exists(str_stock):
@@ -204,3 +205,4 @@ def clearOldFile(file_dir):
 
 if __name__ == '__main__':
     handleExcel()
+    luaCodeGen.LuaCodeGen.GenLuaCode()
