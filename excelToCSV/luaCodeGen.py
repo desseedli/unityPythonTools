@@ -68,6 +68,7 @@ class LuaCodeGen:
                 file_name_no_extension, extension = os.path.splitext(file_name)
                 open_file_path = os.path.join(file_path, file_name)
                 lua_content = "local " + file_name_no_extension + " ={\n"
+                print("open_file_path:" + open_file_path)
                 with open(open_file_path, 'r', encoding='utf-8') as csvfile:
                     csvreader = csv.reader(csvfile)
                     next(csvfile)
@@ -76,11 +77,14 @@ class LuaCodeGen:
 
                     csvdictreader = csv.DictReader(csvfile, fieldnames=header)
                     for row_index, row_value in enumerate(csvdictreader, start=4):
-                        lua_content += "[" + row_value['Id'] + "] = {\n"
+                        lua_content += "[" + row_value[header[0]] + "] = {\n"
                         for index, value in enumerate(header):
                             type = types[index]
                             if type == "int":
-                                lua_content += "['" + value + "'] = " + row_value[value] + ",\n"
+                                if len(row_value[value]) == 0 :
+                                    lua_content += "['" + value + "'] = 0" + ",\n"
+                                else:
+                                    lua_content += "['" + value + "'] = " + row_value[value] + ",\n"
                             elif type == "string":
                                 lua_content += "['" + value + "'] = " + '\'' + row_value[value] + '\'' + ",\n"
                             elif type == "list":
@@ -98,4 +102,4 @@ class LuaCodeGen:
                     lua_file.write(lua_content)
 
         print("done")
-#LuaCodeGen.GenLuaCode()
+# LuaCodeGen.GenLuaCode()

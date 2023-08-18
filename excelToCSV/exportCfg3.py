@@ -58,6 +58,7 @@ class changeCSVCenter:
 
     def getvalue(self, filename):
         self.mData = []
+        print(filename + "filename:")
         workbook = openpyxl.load_workbook(filename)
         table = workbook.worksheets[0]
         max_row = table.max_row
