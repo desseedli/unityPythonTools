@@ -109,6 +109,8 @@ class changeServerCenter:
                 if splitType is not None:
                     if 'a' in splitType or 's' in splitType or splitType == '':
                         row.append(value)
+                else:
+                    row.append(value)
 
             if i != SplitCol:
                 self.mData.append(tuple(row))
