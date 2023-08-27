@@ -2,8 +2,8 @@ import os
 import logging
 import csv
 import openpyxl
-
 import luaCodeGen
+import argparse
 from luaCodeGen import LuaCodeGen
 
 INPUTPATH = u"excel_new"
@@ -15,6 +15,7 @@ ExportCSVFileCfgPath = u"exportCSVFileCfg.txt"
 SplitCol = 3
 Col = 4
 IsUseExportList = False
+
 
 class changeLuaCenter:
     def __init__(self):
@@ -136,6 +137,29 @@ def handleClear():
     clearOldFile(LUACSVOUTPATH)
 
 
+def manuallyBuild(paths):
+    for path in paths:
+        if os.path.exists(path):
+            print(path)
+            st = changeCSVCenter()
+            st.getvalue(path)
+            name = path.split("/")[-1].split(".")[0]
+            st.write(CLIENTPATH, name + ".csv")
+
+            st = changeLuaCenter()
+            st.getvalue(path)
+            name = path.split("/")[-1].split(".")[0]
+            st.write(LUACSVOUTPATH, name + ".csv")
+
+            st = changeServerCenter()
+            st.getvalue(path)
+            name = path.split("/")[-1].split(".")[0]
+            st.write(SERVERPATH, name + ".csv")
+        else:
+            print(path + " don't exist")
+            return
+
+
 def handleExcel():
     handleClear()
     csvCfgFiles = []
@@ -207,5 +231,28 @@ def clearOldFile(file_dir):
 
 
 if __name__ == '__main__':
-    handleExcel()
-    luaCodeGen.LuaCodeGen.GenLuaCode()
+    parser = argparse.ArgumentParser(description="can input -all -o -auto")
+    parser.add_argument("-all", "--buildAll", action="store_true", help="build all excel mode,folder is excel")
+    parser.add_argument("-auto", "--autoBuild", action="store_true", help="auto build all excel in folder is excel_new")
+    parser.add_argument("-o", "--output", nargs='+', help="build the spec excel mode,enter param manually,like "
+                                                          "./excel/aaa.xlsx")
+
+    args = parser.parse_args()
+    if args.buildAll:
+        INPUTPATH = u"excel"
+        IsUseExportList = True
+        handleExcel()
+        luaCodeGen.LuaCodeGen.GenLuaCode()
+    elif args.autoBuild:
+        INPUTPATH = u"excel_new"
+        IsUseExportList = False
+        handleExcel()
+        luaCodeGen.LuaCodeGen.GenLuaCode()
+    elif args.output:
+        manuallyBuild(args.output)
+        luaCodeGen.LuaCodeGen.GenLuaCode()
+    else:
+        INPUTPATH = u"excel_new"
+        IsUseExportList = False
+        handleExcel()
+        luaCodeGen.LuaCodeGen.GenLuaCode()

@@ -98,6 +98,9 @@ class LuaCodeGen:
                 lua_file_name = os.path.join(save_path, file_name_no_extension)
                 lua_file_name += '.lua'
                 # print(lua_content)
+                if not os.path.exists(save_path):
+                    os.makedirs(save_path)
+
                 with open(lua_file_name, 'w', encoding='utf-8') as lua_file:
                     lua_file.write(lua_content)
 
