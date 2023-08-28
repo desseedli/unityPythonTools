@@ -32,7 +32,8 @@ class changeLuaCenter:
             row = []
             for j in range(1, max_column + 1):
                 value = table.cell(i, j).value
-                value = str(value).strip()
+                if value is not None:
+                    value = str(value).strip()
                 split_type = table.cell(SplitCol, j).value
                 nameKey = table.cell(NameCol,j).value
                 if nameKey is not None and split_type is not None:                   
@@ -71,7 +72,8 @@ class changeCSVCenter:
             row = []
             for j in range(1, max_column + 1):
                 value = table.cell(i, j).value
-                value = str(value).strip()
+                if value is not None:
+                    value = str(value).strip()
                 splitType = table.cell(SplitCol, j).value
                 nameKey = table.cell(NameCol, j).value
                 if nameKey is not None and splitType is not None:
@@ -111,7 +113,8 @@ class changeServerCenter:
             row = []
             for j in range(1, max_column + 1):
                 value = table.cell(i, j).value
-                value = str(value).strip()
+                if value is not None:
+                    value = str(value).strip()
                 splitType = table.cell(SplitCol, j).value
                 nameKey = table.cell(NameCol, j).value
                 if nameKey is not None:
