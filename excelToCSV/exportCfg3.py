@@ -13,6 +13,7 @@ LUACSVOUTPATH = u"csv_lua"
 ExportLuaFileCfgPath = u"exportLuaFileCfg.txt"
 ExportCSVFileCfgPath = u"exportCSVFileCfg.txt"
 SplitCol = 3
+NameCol = 2
 Col = 4
 IsUseExportList = False
 
@@ -32,7 +33,8 @@ class changeLuaCenter:
             for j in range(1, max_column + 1):
                 value = table.cell(i, j).value
                 split_type = table.cell(SplitCol, j).value
-                if split_type is not None:
+                nameKey = table.cell(NameCol,j).value
+                if nameKey is not None and split_type is not None:                   
                     if 'a' in split_type or 'l' in split_type:
                         row.append(value)
             if i != SplitCol:
@@ -69,7 +71,8 @@ class changeCSVCenter:
             for j in range(1, max_column + 1):
                 value = table.cell(i, j).value
                 splitType = table.cell(SplitCol, j).value
-                if splitType is not None:
+                nameKey = table.cell(NameCol,j).value
+                if nameKey is not None and split_type is not None:                  
                     if 'a' in splitType or 'c' in splitType:
                         row.append(value)
 
@@ -107,11 +110,13 @@ class changeServerCenter:
             for j in range(1, max_column + 1):
                 value = table.cell(i, j).value
                 splitType = table.cell(SplitCol, j).value
-                if splitType is not None:
-                    if 'a' in splitType or 's' in splitType or splitType == '':
+                nameKey = table.cell(NameCol,j).value
+                if nameKey is not None:
+                    if splitType is not None:
+                        if 'a' in splitType or 's' in splitType or splitType == '':
+                            row.append(value)
+                    else:
                         row.append(value)
-                else:
-                    row.append(value)
 
             if i != SplitCol:
                 self.mData.append(tuple(row))
