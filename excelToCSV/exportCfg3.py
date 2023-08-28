@@ -32,6 +32,7 @@ class changeLuaCenter:
             row = []
             for j in range(1, max_column + 1):
                 value = table.cell(i, j).value
+                value = str(value).strip()
                 split_type = table.cell(SplitCol, j).value
                 nameKey = table.cell(NameCol,j).value
                 if nameKey is not None and split_type is not None:                   
@@ -62,7 +63,7 @@ class changeCSVCenter:
     def getvalue(self, filename):
         self.mData = []
         print(filename + "filename:")
-        workbook = openpyxl.load_workbook(filename)
+        workbook = openpyxl.load_workbook(filename, data_only=True)
         table = workbook.worksheets[0]
         max_row = table.max_row
         max_column = table.max_column
@@ -70,9 +71,10 @@ class changeCSVCenter:
             row = []
             for j in range(1, max_column + 1):
                 value = table.cell(i, j).value
+                value = str(value).strip()
                 splitType = table.cell(SplitCol, j).value
-                nameKey = table.cell(NameCol,j).value
-                if nameKey is not None and split_type is not None:                  
+                nameKey = table.cell(NameCol, j).value
+                if nameKey is not None and splitType is not None:
                     if 'a' in splitType or 'c' in splitType:
                         row.append(value)
 
@@ -101,7 +103,7 @@ class changeServerCenter:
 
     def getvalue(self, filename):
         self.mData = []
-        workbook = openpyxl.load_workbook(filename)
+        workbook = openpyxl.load_workbook(filename, data_only=True)
         table = workbook.worksheets[0]
         max_row = table.max_row
         max_column = table.max_column
@@ -109,8 +111,9 @@ class changeServerCenter:
             row = []
             for j in range(1, max_column + 1):
                 value = table.cell(i, j).value
+                value = str(value).strip()
                 splitType = table.cell(SplitCol, j).value
-                nameKey = table.cell(NameCol,j).value
+                nameKey = table.cell(NameCol, j).value
                 if nameKey is not None:
                     if splitType is not None:
                         if 'a' in splitType or 's' in splitType or splitType == '':
