@@ -80,7 +80,7 @@ class changeCSVCenter:
                     if 'a' in splitType or 'c' in splitType:
                         row.append(value)
 
-            if i + 1 != SplitCol:
+            if i != SplitCol:
                 self.mData.append(tuple(row))
 
     def write(self, path, filename):
