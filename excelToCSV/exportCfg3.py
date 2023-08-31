@@ -249,21 +249,22 @@ if __name__ == '__main__':
                                                           "./excel/aaa.xlsx")
 
     args = parser.parse_args()
+    luaCodeGen = LuaCodeGen()
     if args.buildAll:
         INPUTPATH = u"excel"
         IsUseExportList = True
         handleExcel()
-        luaCodeGen.LuaCodeGen.GenLuaCode()
+        luaCodeGen.gen_lua_code()
     elif args.autoBuild:
         INPUTPATH = u"excel_new"
         IsUseExportList = False
         handleExcel()
-        luaCodeGen.LuaCodeGen.GenLuaCode()
+        luaCodeGen.gen_lua_code()
     elif args.output:
         manuallyBuild(args.output)
-        luaCodeGen.LuaCodeGen.GenLuaCode()
+        luaCodeGen.gen_lua_code()
     else:
         INPUTPATH = u"excel_new"
         IsUseExportList = False
         handleExcel()
-        luaCodeGen.LuaCodeGen.GenLuaCode()
+        luaCodeGen.gen_lua_code()

@@ -1,38 +1,84 @@
 import os
 import csv
+import math
 
 file_path = './csv_lua'
 save_path = './lua'
 
+count_limit = 2000
 
-# 不能使用CSV的公式 比如F5格子+1等
 class LuaCodeGen:
-    def IsInt(string):
+    def __init__(self):
+        self.file_name_no_extension = ""
+
+    def create_lua_header(self, page_count):
+        lua_file_name = os.path.join(save_path, self.file_name_no_extension)
+        lua_file_name += '.lua'
+        lua_content = "return function()\n"
+        lua_content += "\tlocal " + self.file_name_no_extension + " = {}\n"
+        lua_content += "\tfor i = 1, " + str(page_count) + " do\n"
+        lua_content += "\t\tlocal cfg = InternalRequire('{}' ..i,true)\n".format(self.file_name_no_extension)
+        lua_content += "\t\tfor k ,v in pairs(cfg) do\n"
+        lua_content += "\t\t\t" + self.file_name_no_extension + "[k] = v\n"
+        lua_content += "\t\tend\n"
+        lua_content += "\tend\n"
+        for page in range(1, page_count + 1):
+            lua_content += "\tpackage.loaded['{}'] = nil\n".format(self.file_name_no_extension + str(page))
+        lua_content += "\treturn " + self.file_name_no_extension + "\n"
+        lua_content += "end"
+        with open(lua_file_name, 'w', encoding='utf-8') as lua_file:
+            lua_file.write(lua_content)
+
+    def write_lua_content(self, startRow, csvdictreader, types, header):
+        lua_content = ""
+        count = 0
+        for row_index, row_value in enumerate(csvdictreader, start=startRow):
+            count += 1
+            lua_content += "[" + row_value[header[0]] + "]={\n"
+            for index, value in enumerate(header):
+                type = types[index]
+                if type == "int" or type == "float":
+                    if len(row_value[value]) == 0:
+                        lua_content += "['" + value + "']=0" + ",\n"
+                    else:
+                        lua_content += "['" + value + "']=" + row_value[value] + ",\n"
+                elif type == "string":
+                    lua_content += "['" + value + "']=" + '\'' + row_value[value] + '\'' + ",\n"
+                elif type == "list" and len(row_value[value].strip()) != 0:
+                    lua_content += "['" + value + "']={"
+                    lua_content += self.handle_type_is_list_str(row_value[value])
+                    lua_content += "},\n"
+            lua_content += "},\n"
+            if count >= count_limit:
+                return lua_content
+        return lua_content
+
+    def is_int(self, string):
         try:
             int(string)
             return True
         except ValueError:
             return False
 
-    def IsFloat(string):
+    def is_float(self, string):
         try:
-            float(string)
+            float(self, string)
             return True
         except ValueError:
             return False
 
-    def HandleTypeIsListStr(string):
+    def handle_type_is_list_str(self, string):
         res = ""
         if ';' in string:
             parts = string.split(';')
             for index, part in enumerate(parts):
                 if ':' in part:
-                    temp_res = LuaCodeGen.HandleTypeIsListStr(part)
+                    temp_res = self.handle_type_is_list_str(part)
                     res += temp_res
                     if not index == len(parts) - 1:
                         res += ','
                 else:
-                    if LuaCodeGen.IsInt(part) or LuaCodeGen.IsFloat(part):
+                    if self.is_int(part) or self.is_float(part):
                         res += part
                     else:
                         res += '\'' + part + '\''
@@ -42,67 +88,72 @@ class LuaCodeGen:
             parts = string.split(':')
             res += "{"
             for index, part in enumerate(parts):
-                if LuaCodeGen.IsInt(part) or LuaCodeGen.IsFloat(part):
+                if self.is_int(part) or self.is_float(part):
                     res += part
                     if not index == len(parts) - 1:
                         res += ','
             res += "}"
         elif '|' in string and ';' not in string and ':' not in string:
             res += "{{"
-            if LuaCodeGen.IsInt(string) or LuaCodeGen.IsFloat(string):
+            if self.is_int(string) or self.is_float(string):
                 res += string
             res += "}}"
         else:
-            if LuaCodeGen.IsInt(string) or LuaCodeGen.IsFloat(string):
+            if self.is_int(string) or self.is_float(string):
                 res += string
             else:
                 res += '\'' + string + '\''
         return res
 
     # 代码生成函数
-    @staticmethod
-    def GenLuaCode():
+    def gen_lua_code(self):
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+
         file_list = os.listdir(file_path)
         for file_name in file_list:
             if file_name.endswith('csv'):
-                file_name_no_extension, extension = os.path.splitext(file_name)
+                self.file_name_no_extension, extension = os.path.splitext(file_name)
                 open_file_path = os.path.join(file_path, file_name)
-                lua_content = "local " + file_name_no_extension + " ={\n"
                 print("open_file_path:" + open_file_path)
+
                 with open(open_file_path, 'r', encoding='utf-8') as csvfile:
+                    csvreader = csv.reader(csvfile)
+                    row_count = sum(1 for _ in csvreader)
+                    need_page = math.ceil(row_count / count_limit)
+
+                    csvfile.seek(0)
+
                     csvreader = csv.reader(csvfile)
                     next(csvfile)
                     header = next(csvreader)
                     types = next(csvreader)
-
                     csvdictreader = csv.DictReader(csvfile, fieldnames=header)
-                    for row_index, row_value in enumerate(csvdictreader, start=4):
-                        lua_content += "[" + row_value[header[0]] + "]={\n"
-                        for index, value in enumerate(header):
-                            type = types[index]
-                            if type == "int" or type == "float":
-                                if len(row_value[value]) == 0:
-                                    lua_content += "['" + value + "'] = 0" + ",\n"
-                                else:
-                                    lua_content += "['" + value + "'] = " + row_value[value] + ",\n"
-                            elif type == "string":
-                                lua_content += "['" + value + "'] = " + '\'' + row_value[value] + '\'' + ",\n"
-                            elif type == "list" and len(row_value[value].strip()) != 0:
-                                lua_content += "['" + value + "'] = {"
-                                lua_content += LuaCodeGen.HandleTypeIsListStr(row_value[value])
-                                lua_content += "},\n"
-                        lua_content += "},\n"
-                    lua_content += "}\n"
-                    lua_content += "return " + file_name_no_extension
+                    if need_page == 1:
+                        lua_content = "local " + self.file_name_no_extension + "={\n"
+                        lua_content += self.write_lua_content(4, csvdictreader, types, header)
+                        lua_content += "}\n"
+                        lua_content += "return " + self.file_name_no_extension
 
-                lua_file_name = os.path.join(save_path, file_name_no_extension)
-                lua_file_name += '.lua'
-                # print(lua_content)
-                if not os.path.exists(save_path):
-                    os.makedirs(save_path)
-
-                with open(lua_file_name, 'w', encoding='utf-8') as lua_file:
-                    lua_file.write(lua_content)
-
+                        lua_file_name = os.path.join(save_path, self.file_name_no_extension)
+                        lua_file_name += '.lua'
+                        with open(lua_file_name, 'w', encoding='utf-8') as lua_file:
+                            lua_file.write(lua_content)
+                    elif need_page > 1:
+                        self.create_lua_header(need_page)
+                        for page in range(1, need_page + 1):
+                            class_name = self.file_name_no_extension + str(page)
+                            lua_content = "local " + class_name + " ={\n"
+                            lua_content += self.write_lua_content((page - 1) * count_limit + 4, csvdictreader, types,
+                                                                  header)
+                            lua_content += "}\n"
+                            lua_content += "return " + self.file_name_no_extension
+                            lua_file_name = os.path.join(save_path, class_name)
+                            lua_file_name += '.lua'
+                            with open(lua_file_name, 'w', encoding='utf-8') as lua_file:
+                                lua_file.write(lua_content)
         print("done")
-# LuaCodeGen.GenLuaCode()
+
+
+#luaCodeGen = LuaCodeGen()
+#luaCodeGen.gen_lua_code()
