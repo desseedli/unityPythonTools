@@ -10,6 +10,9 @@ count_limit = 2000
 class LuaCodeGen:
     def __init__(self):
         self.file_name_no_extension = ""
+        self.csvdictreader = {}
+        self.types = {}
+        self.header = {}
 
     def create_lua_header(self, page_count):
         lua_file_name = os.path.join(save_path, self.file_name_no_extension)
@@ -29,14 +32,14 @@ class LuaCodeGen:
         with open(lua_file_name, 'w', encoding='utf-8') as lua_file:
             lua_file.write(lua_content)
 
-    def write_lua_content(self, startRow, csvdictreader, types, header):
+    def write_lua_content(self, startRow):
         lua_content = ""
         count = 0
-        for row_index, row_value in enumerate(csvdictreader, start=startRow):
+        for row_index, row_value in enumerate(self.csvdictreader, start=startRow):
             count += 1
-            lua_content += "[" + row_value[header[0]] + "]={\n"
-            for index, value in enumerate(header):
-                type = types[index]
+            lua_content += "[" + row_value[self.header[0]] + "]={\n"
+            for index, value in enumerate(self.header):
+                type = self.types[index]
                 if type == "int" or type == "float":
                     if len(row_value[value]) == 0:
                         lua_content += "['" + value + "']=0" + ",\n"
@@ -126,12 +129,12 @@ class LuaCodeGen:
 
                     csvreader = csv.reader(csvfile)
                     next(csvfile)
-                    header = next(csvreader)
-                    types = next(csvreader)
-                    csvdictreader = csv.DictReader(csvfile, fieldnames=header)
+                    self.header = next(csvreader)
+                    self.types = next(csvreader)
+                    self.csvdictreader = csv.DictReader(csvfile, fieldnames=self.header)
                     if need_page == 1:
                         lua_content = "local " + self.file_name_no_extension + "={\n"
-                        lua_content += self.write_lua_content(4, csvdictreader, types, header)
+                        lua_content += self.write_lua_content(4)
                         lua_content += "}\n"
                         lua_content += "return " + self.file_name_no_extension
 
@@ -144,8 +147,7 @@ class LuaCodeGen:
                         for page in range(1, need_page + 1):
                             class_name = self.file_name_no_extension + str(page)
                             lua_content = "local " + class_name + " ={\n"
-                            lua_content += self.write_lua_content((page - 1) * count_limit + 4, csvdictreader, types,
-                                                                  header)
+                            lua_content += self.write_lua_content((page - 1) * count_limit + 4)
                             lua_content += "}\n"
                             lua_content += "return " + self.file_name_no_extension
                             lua_file_name = os.path.join(save_path, class_name)
