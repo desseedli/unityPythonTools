@@ -47,6 +47,11 @@ class LuaCodeGen:
                         lua_content += "['" + value + "']=" + row_value[value] + ",\n"
                 elif type == "string":
                     lua_content += "['" + value + "']=" + '\'' + row_value[value] + '\'' + ",\n"
+                elif type == "bool":
+                    if len(row_value[value]) == 0:
+                        lua_content += "['" + value + "']=false,\n"
+                    else:
+                        lua_content += "['" + value + "']=" + row_value[value] + ",\n"
                 elif type == "list" and len(row_value[value].strip()) != 0:
                     lua_content += "['" + value + "']={"
                     lua_content += self.handle_type_is_list_str(row_value[value])
