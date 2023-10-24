@@ -155,7 +155,7 @@ class LuaCodeGen:
                             lua_content = "local " + class_name + " ={\n"
                             lua_content += self.write_lua_content((page - 1) * count_limit + 4)
                             lua_content += "}\n"
-                            lua_content += "return " + self.file_name_no_extension
+                            lua_content += "return " + self.file_name_no_extension + str(page)
                             lua_file_name = os.path.join(save_path, class_name)
                             lua_file_name += '.lua'
                             with open(lua_file_name, 'w', encoding='utf-8') as lua_file:
