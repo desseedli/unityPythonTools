@@ -36,29 +36,30 @@ class LuaCodeGen:
         lua_content = ""
         count = 0
         for row_index, row_value in enumerate(self.csvdictreader, start=startRow):
-            count += 1
-            lua_content += "[" + row_value[self.header[0]] + "]={\n"
-            for index, value in enumerate(self.header):
-                type = self.types[index]
-                if type == "int" or type == "float":
-                    if len(row_value[value]) == 0:
-                        lua_content += "['" + value + "']=0" + ",\n"
-                    else:
-                        lua_content += "['" + value + "']=" + row_value[value] + ",\n"
-                elif type == "string":
-                    lua_content += "['" + value + "']=" + '\'' + row_value[value] + '\'' + ",\n"
-                elif type == "bool":
-                    if len(row_value[value]) == 0:
-                        lua_content += "['" + value + "']=false,\n"
-                    else:
-                        lua_content += "['" + value + "']=" + row_value[value] + ",\n"
-                elif type == "list" and len(row_value[value].strip()) != 0:
-                    lua_content += "['" + value + "']={"
-                    lua_content += self.handle_type_is_list_str(row_value[value])
-                    lua_content += "},\n"
-            lua_content += "},\n"
-            if count >= count_limit:
-                return lua_content
+            if row_value[self.header[0]]:
+                count += 1
+                lua_content += "[" + row_value[self.header[0]] + "]={\n"
+                for index, value in enumerate(self.header):
+                    type = self.types[index]
+                    if type == "int" or type == "float":
+                        if len(row_value[value]) == 0:
+                            lua_content += "['" + value + "']=0" + ",\n"
+                        else:
+                            lua_content += "['" + value + "']=" + row_value[value] + ",\n"
+                    elif type == "string":
+                        lua_content += "['" + value + "']=" + '\'' + row_value[value] + '\'' + ",\n"
+                    elif type == "bool":
+                        if len(row_value[value]) == 0:
+                            lua_content += "['" + value + "']=false,\n"
+                        else:
+                            lua_content += "['" + value + "']=" + row_value[value] + ",\n"
+                    elif type == "list" and len(row_value[value].strip()) != 0:
+                        lua_content += "['" + value + "']={"
+                        lua_content += self.handle_type_is_list_str(row_value[value])
+                        lua_content += "},\n"
+                lua_content += "},\n"
+                if count >= count_limit:
+                    return lua_content
         return lua_content
 
     def is_int(self, string):
@@ -70,7 +71,7 @@ class LuaCodeGen:
 
     def is_float(self, string):
         try:
-            float(self, string)
+            float(string)
             return True
         except ValueError:
             return False
