@@ -2,12 +2,12 @@ import os
 import logging
 import csv
 import openpyxl
-import luaCodeGen
+import luaCodeGen_jiejiemao
 import argparse
 import sys
 import time
 from io import StringIO
-from luaCodeGen import LuaCodeGen
+from luaCodeGen_jiejiemao import LuaCodeGen
 
 INPUTPATH = u"excel"
 SERVERPATH = u"csv_server"
